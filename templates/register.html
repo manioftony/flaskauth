@@ -1,0 +1,17 @@
+<div class="container">
+
+    <form action="" method="post">
+    <label>Username</label>
+    <input type="text" name="username" id="username"></br>
+    <label>Password</label>
+    <input type="password" name="password" id="password">
+
+    <input class="btn btn-default" type="submit" value="Login">
+
+    </form>
+
+    {% if error %}
+    <p class="error"><<strong>Error:</strong>{{error}}</p>
+    {% endif %}
+
+</div>
