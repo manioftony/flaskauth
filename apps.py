@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, \
      check_password_hash
 from flask.ext.security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required
-from flask_login import login_user,LoginManager
+from flask_login import login_user,LoginManager,logout_user
 from passlib.apps import custom_app_context as pwd_context
 
 app = Flask(__name__)
@@ -14,10 +14,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/mani/gitproject/flaskau
 db = SQLAlchemy(app)
 
 
-
+@login_required
 @app.route('/')
 def index():
-    return "fddghfdh"
+    obj = User.query.all()
+    return render_template('table.html',**locals())
 
 
 
@@ -54,7 +55,7 @@ class User(db.Model,UserMixin):
         return '<User %r>' % (self.username)
 
 
-@app.route('/register',methods=['POST','GET'])
+@app.route('/login',methods=['POST','GET'])
 def register():
     # import ipdb;ipdb.set_trace()
     if request.method == 'POST':
@@ -66,10 +67,20 @@ def register():
          if not user or not user.verify_password(password):
             return False
          login_user(user)
-         # return redirect(url_for('index'))
-         return "successfully registered"
+         return redirect(url_for('index'))
+         # return "successfully registered"
     if request.method == 'GET':
         return render_template('register.html',**locals())
+
+
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('register'))
+
+
 
 
 login_manager = LoginManager()
