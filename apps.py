@@ -7,6 +7,10 @@ from flask.ext.security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required
 
 app = Flask(__name__)
+app.config['SECRET_KEY']='super-secret'
+
+
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/mani/gitproject/flaskauth/karthik.db'
 db = SQLAlchemy(app)
@@ -60,6 +64,20 @@ class User(db.Model,UserMixin):
         return pwd_context.verify(password, self.password_hash)
 
 
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
+
+    def __repr__(self):
+        return '<User %r>' % (self.username)
 
 
 
@@ -69,8 +87,9 @@ class User(db.Model,UserMixin):
 
 from flask_login import login_user,LoginManager
 
-# login_manager = LoginManager()
-# login_manager.init_app(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 
 
