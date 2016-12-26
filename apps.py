@@ -5,13 +5,11 @@ from werkzeug.security import generate_password_hash, \
      check_password_hash
 from flask.ext.security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required
+from flask_login import login_user,LoginManager
+from passlib.apps import custom_app_context as pwd_context
 
 app = Flask(__name__)
 app.config['SECRET_KEY']='super-secret'
-
-
-
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/mani/gitproject/flaskauth/karthik.db'
 db = SQLAlchemy(app)
 
@@ -19,35 +17,11 @@ db = SQLAlchemy(app)
 
 @app.route('/')
 def index():
-
     return "fddghfdh"
 
 
 
 
-# class User(db.Model):
-#     id = db.Column(db.Integer,primary_key=True)
-#     username = db.Column(db.String(120),unique=True)
-#     password = db.Column(db.String(120),unique=True)
-
-
-#     # def __init__(self,username,email):
-#     #     self.username = username
-#     #     self.email = email
-#     # def __repr__(self):
-#     #     return "<User %r>"%self.username
-
-#     def __init__(self, username, password):
-#         self.username = username
-#         self.set_password(password)
-
-
-#     def set_password(self, password):
-#         self.pw_hash = generate_password_hash(password)
-
-#     def check_password(self, password):
-#         return check_password_hash(self.pw_hash, password)
-from passlib.apps import custom_app_context as pwd_context
 
 
 class User(db.Model,UserMixin):
@@ -80,25 +54,9 @@ class User(db.Model,UserMixin):
         return '<User %r>' % (self.username)
 
 
-
-
-
-
-
-from flask_login import login_user,LoginManager
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-
-
-
-
-
 @app.route('/register',methods=['POST','GET'])
 def register():
-    import ipdb;ipdb.set_trace()
+    # import ipdb;ipdb.set_trace()
     if request.method == 'POST':
          # username = request.json.get('username')
          # password = request.json.get('password')
@@ -114,7 +72,16 @@ def register():
         return render_template('register.html',**locals())
 
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
+@login_manager.user_loader
+def load_user(userid):
+    try:
+        return session.query(User).filter(User.id == userid).first()
+    except:
+        return None
 
 
 
@@ -127,15 +94,10 @@ def usercreation():
 
 
 
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
+
 
