@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,redirect,url_for
+from flask import Flask,render_template,request,redirect,url_for,g
 from flask_sqlalchemy import SQLAlchemy
 
 from werkzeug.security import generate_password_hash, \
@@ -13,12 +13,6 @@ app.config['SECRET_KEY']='super-secret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/mani/gitproject/flaskauth/karthik.db'
 db = SQLAlchemy(app)
 
-
-@login_required
-@app.route('/')
-def index():
-    obj = User.query.all()
-    return render_template('table.html',**locals())
 
 
 
@@ -55,19 +49,50 @@ class User(db.Model,UserMixin):
         return '<User %r>' % (self.username)
 
 
+
+login_manager = LoginManager()
+# login_manager.session_protection = 'strong'
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+
+
+
+
+
+
+
+
+@app.route('/')
+@login_required
+def index():
+    # import ipdb;ipdb.set_trace()
+    obj = User.query.all()
+    return render_template('table.html',**locals())
+
+
+from flask import flash
 @app.route('/login',methods=['POST','GET'])
 def register():
     # import ipdb;ipdb.set_trace()
     if request.method == 'POST':
-         # username = request.json.get('username')
-         # password = request.json.get('password')
-         username = request.form['username']
-         password = request.form['password']
-         user = User.query.filter_by(username = username).first()
-         if not user or not user.verify_password(password):
+        # username = request.json.get('username')
+        # password = request.json.get('password')
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username = username).first()
+        if not user or not user.verify_password(password):
             return False
-         login_user(user)
-         return redirect(url_for('index'))
+        login_user(user)
+        obj = User.query.all()
+        # flash("use loghin")
+        # return render_template('table.html',**locals())
+        return redirect(url_for('index'))
          # return "successfully registered"
     if request.method == 'GET':
         return render_template('register.html',**locals())
@@ -82,17 +107,6 @@ def logout():
 
 
 
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-@login_manager.user_loader
-def load_user(userid):
-    try:
-        return session.query(User).filter(User.id == userid).first()
-    except:
-        return None
 
 
 
@@ -112,3 +126,4 @@ if __name__ == '__main__':
 
 
 
+z

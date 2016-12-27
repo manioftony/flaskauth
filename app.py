@@ -6,7 +6,7 @@ from flask.ext.security import Security, SQLAlchemyUserDatastore, \
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/mani/gitproject/flaskauth/artelus.db'
 app.config['SECRET_KEY']='super-secret'
-# app.config['SECURITY_REGISTERABLE'] = True
+app.config['SECURITY_REGISTERABLE'] = True
 db = SQLAlchemy(app)
 
 
