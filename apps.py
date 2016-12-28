@@ -57,6 +57,7 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
+    g.user = User.query.get(int(user_id))
     return User.query.get(int(user_id))
 
 
@@ -72,6 +73,7 @@ def load_user(user_id):
 @login_required
 def index():
     # import ipdb;ipdb.set_trace()
+    print '-----------------------------',g.user.username
     obj = User.query.all()
     return render_template('table.html',**locals())
 
@@ -125,5 +127,3 @@ if __name__ == '__main__':
 
 
 
-
-z
