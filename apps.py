@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,redirect,url_for,g
+from flask import Flask,render_template,request,redirect,url_for,g,jsonify,session
 from flask_sqlalchemy import SQLAlchemy
 
 from werkzeug.security import generate_password_hash, \
@@ -7,7 +7,7 @@ from flask.ext.security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required
 from flask_login import login_user,LoginManager,logout_user
 from passlib.apps import custom_app_context as pwd_context
-
+from uuid import uuid4
 app = Flask(__name__)
 app.config['SECRET_KEY']='super-secret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/mani/gitproject/flaskauth/karthik.db'
@@ -79,10 +79,12 @@ def index():
 
 
 from flask import flash
-@app.route('/login',methods=['POST','GET'])
+@app.route('/login',methods=['POST','GET','PUT'])
 def login():
     # import ipdb;ipdb.set_trace()
     if request.method == 'POST':
+
+        session['token'] =  uuid4().hex[:32]
         # username = request.json.get('username')
         # password = request.json.get('password')
         username = request.form['username']
@@ -98,14 +100,42 @@ def login():
          # return "successfully registered"
     if request.method == 'GET':
         return render_template('register.html',**locals())
-
-
+    if request.method == 'PUT':
+        session['token'] =  uuid4().hex[:32]
+        username = request.json.get('username')
+        password = request.json.get('password')
+        user = User.query.filter_by(username = username).first()
+        if not user or not user.verify_password(password):
+            return jsonify({'Error':'Your Authentication failure'})
+        login_user(user)
+        return jsonify({'Message':'successfully logged in','session':session['token']})
 
 
 @app.route('/logout')
 def logout():
     logout_user()
+    session.pop('token', None)
     return redirect(url_for('login'))
+
+
+
+
+
+@app.route('/home',methods=['POST'])
+# @login_required
+def home():
+    # import ipdb;ipdb.set_trace()
+    try:
+        obj = User.query.all()
+        return jsonify({'user':'successfully logged in'})
+    except:
+        return jsonify({'failure':'authenticate failure'})
+
+@app.route('/homes')
+def homes():
+
+    return jsonify({'user':'successfully logged in'})
+
 
 
 
