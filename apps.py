@@ -80,7 +80,7 @@ def index():
 
 from flask import flash
 @app.route('/login',methods=['POST','GET'])
-def register():
+def login():
     # import ipdb;ipdb.set_trace()
     if request.method == 'POST':
         # username = request.json.get('username')
@@ -89,7 +89,7 @@ def register():
         password = request.form['password']
         user = User.query.filter_by(username = username).first()
         if not user or not user.verify_password(password):
-            return False
+            return "Your Authentication failure"
         login_user(user)
         obj = User.query.all()
         # flash("use loghin")
@@ -105,7 +105,7 @@ def register():
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('register'))
+    return redirect(url_for('login'))
 
 
 
